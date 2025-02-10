@@ -1,6 +1,6 @@
 ;;; latex-change-env.el --- Change in and out of LaTeX environments -*- lexical-binding: t; -*-
 
-;; Copyright © 2021–2024 Tony Zorman
+;; Copyright © 2021–2025 Tony Zorman
 ;;
 ;; Author: Tony Zorman <soliditsallgood@mailbox.org>
 ;; Keywords: convenience, tex
@@ -461,10 +461,13 @@ specified by `latex-change-env-options'."
     (funcall fn)))
 
 ;;;###autoload
-(defun latex-change-env-cycle (envs)
+(defun latex-change-env-cycle (&optional envs)
   "Cycle through environments.
-ENVS is a list of environments to cycle through.  The special
-symbol `display-math' denotes a display maths environment.
+ENVS is a list of environments to cycle through.  The special symbol
+`display-math' denotes a display maths environment.  If this argument is
+not given, it defaults to
+
+    \\='(display-math equation* equation align* align)
 
 This function heavily depends on the `math-delimiters'
 package[1].  If one is right at the end of a display or inline
@@ -481,9 +484,10 @@ preferences, ignoring `latex-change-env-math-display'!.
   (require 'math-delimiters)
   (defvar math-delimiters-display)
   (defvar math-delimiters-inline)
-  (setf envs (append envs (list (car envs))))
 
-  (pcase-let* ((`(,env ,env-name _) (or (ignore-errors (save-excursion
+  (pcase-let* ((envs (or envs '(display-math equation* equation align* align)))
+               (envs (append envs (list (car envs))))
+               (`(,env ,env-name _) (or (ignore-errors (save-excursion
                                                          (latex-change-env--closest-env)))
                                         `(:texmathp ,@(and (latex-change-env--texmathp)
                                                            texmathp-why))))
